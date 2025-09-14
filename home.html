@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Passport Photo Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .upload-section {
+            padding: 40px;
+            text-align: center;
+            background: #f8f9fa;
+        }
+
+        .upload-area {
+            border: 3px dashed #4facfe;
+            border-radius: 15px;
+            padding: 50px 20px;
+            background: white;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-area:hover {
+            border-color: #00f2fe;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(79, 172, 254, 0.2);
+        }
+
+        .upload-area.dragover {
+            border-color: #00f2fe;
+            background: #f0f8ff;
+        }
+
+        .upload-icon {
+            font-size: 4em;
+            color: #4facfe;
+            margin-bottom: 20px;
+        }
+
+        .upload-text {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .upload-subtext {
+            color: #666;
+            font-size: 1em;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .preview-container {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .preview-image {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .quantity-section {
+            padding: 40px;
+            background: white;
+            display: none;
+        }
+
+        .quantity-input {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .quantity-input label {
+            display: block;
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .number-input {
+            width: 150px;
+            padding: 15px;
+            font-size: 1.5em;
+            text-align: center;
+            border: 2px solid #4facfe;
+            border-radius: 10px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .number-input:focus {
+            border-color: #00f2fe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.2);
+        }
+
+        .generate-btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(79, 172, 254, 0.3);
+        }
+
+        .passport-grid {
+            padding: 40px;
+            background: white;
+            display: none;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 2px;
+            justify-items: start;
+            margin-top: 20px;
+        }
+
+        .passport-photo {
+            width: 120px;
+            height: 160px;
+            border: 1px solid #ddd;
+            object-fit: cover;
+            transition: transform 0.2s ease;
+        }
+
+        .passport-photo:hover {
+            transform: scale(1.02);
+            z-index: 1;
+            position: relative;
+        }
+
+        .grid-title {
+            text-align: center;
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .print-btn {
+            display: block;
+            margin: 30px auto 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .print-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .reset-btn {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            margin-left: 15px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .reset-btn:hover {
+            background: #d32f2f;
+            transform: translateY(-1px);
+        }
+
+        /* Print-optimized styles - compact layout like photo shops */
+        @media print {
+            body {
+                margin: 0;
+                padding: 0;
+                background: white;
+            }
+            
+            body * {
+                visibility: hidden;
+            }
+            
+            .passport-grid, .passport-grid * {
+                visibility: visible;
+            }
+            
+            .passport-grid {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                padding: 0mm; /* Minimal top and left margin */
+                margin: 0;
+            }
+            
+            .print-btn, .grid-title {
+                display: none !important;
+            }
+            
+            .grid-container {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, 35mm); /* Standard passport photo width */
+                gap: 1mm; /* Minimal gap between photos */
+                justify-content: start;
+                align-content: start;
+                margin: 0;
+                padding: 0;
+            }
+            
+            .passport-photo {
+                width: 35mm; /* Standard passport photo width */
+                height: 45mm; /* Standard passport photo height */
+                border: 0.5px solid #ccc;
+                object-fit: cover;
+                margin: 0;
+                padding: 0;
+                page-break-inside: avoid;
+            }
+            
+            .passport-photo:hover {
+                transform: none;
+            }
+            
+            @page {
+                margin: 0mm; /* Minimal page margins */
+                size: A4;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📸 Passport Photo Generator</h1>
+            <p>Upload your photo and create multiple passport-sized copies instantly</p>
+        </div>
+
+        <div class="upload-section">
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📁</div>
+                <div class="upload-text">Click to upload or drag & drop your photo</div>
+                <div class="upload-subtext">Supports JPG, PNG, GIF formats</div>
+                <input type="file" id="fileInput" accept="image/*">
+            </div>
+            
+            <div class="preview-container" id="previewContainer">
+                <h3>Preview:</h3>
+                <img id="previewImage" class="preview-image" alt="Preview">
+            </div>
+        </div>
+
+        <div class="quantity-section" id="quantitySection">
+            <div class="quantity-input">
+                <label for="photoCount">How many passport photos do you need?</label>
+                <input type="number" id="photoCount" class="number-input" min="1" max="50" value="8" placeholder="Enter number">
+                <br><br>
+                <button class="generate-btn" onclick="generatePhotos()">Generate Photos</button>
+                <button class="reset-btn" onclick="resetForm()">Reset</button>
+            </div>
+        </div>
+
+        <div class="passport-grid" id="passportGrid">
+            <h2 class="grid-title">Your Passport Photos - Print Ready Layout</h2>
+            <div class="grid-container" id="gridContainer"></div>
+            <button class="print-btn" onclick="printPhotos()">🖨️ Print Photos</button>
+        </div>
+    </div>
+
+    <script>
+        let uploadedImage = null;
+
+        // File input and upload area functionality
+        const fileInput = document.getElementById('fileInput');
+        const uploadArea = document.getElementById('uploadArea');
+        const previewContainer = document.getElementById('previewContainer');
+        const previewImage = document.getElementById('previewImage');
+        const quantitySection = document.getElementById('quantitySection');
+        const passportGrid = document.getElementById('passportGrid');
+
+        // Click to upload
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        // Drag and drop functionality
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileSelect(files[0]);
+            }
+        });
+
+        // File input change
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileSelect(e.target.files[0]);
+            }
+        });
+
+        // Handle file selection
+        function handleFileSelect(file) {
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    uploadedImage = e.target.result;
+                    previewImage.src = uploadedImage;
+                    previewContainer.style.display = 'block';
+                    quantitySection.style.display = 'block';
+                    passportGrid.style.display = 'none';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                alert('Please select a valid image file (JPG, PNG, GIF).');
+            }
+        }
+
+        // Generate passport photos
+        function generatePhotos() {
+            const count = parseInt(document.getElementById('photoCount').value);
+            
+            if (!uploadedImage) {
+                alert('Please upload an image first.');
+                return;
+            }
+            
+            if (!count || count < 1 || count > 50) {
+                alert('Please enter a valid number between 1 and 50.');
+                return;
+            }
+
+            const gridContainer = document.getElementById('gridContainer');
+            gridContainer.innerHTML = '';
+
+            // Create the specified number of passport photos
+            for (let i = 0; i < count; i++) {
+                const img = document.createElement('img');
+                img.src = uploadedImage;
+                img.className = 'passport-photo';
+                img.alt = `Passport Photo ${i + 1}`;
+                gridContainer.appendChild(img);
+            }
+
+            passportGrid.style.display = 'block';
+            
+            // Smooth scroll to the generated photos
+            passportGrid.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Print photos
+        function printPhotos() {
+            window.print();
+        }
+
+        // Reset form
+        function resetForm() {
+            uploadedImage = null;
+            fileInput.value = '';
+            previewContainer.style.display = 'none';
+            quantitySection.style.display = 'none';
+            passportGrid.style.display = 'none';
+            document.getElementById('photoCount').value = 8;
+            document.getElementById('gridContainer').innerHTML = '';
+        }
+
+        // Enter key support for quantity input
+        document.getElementById('photoCount').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                generatePhotos();
+            }
+        });
+    </script>
+</body>
+</html>
