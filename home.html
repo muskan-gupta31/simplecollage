@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Professional Passport Photo Generator</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#667eea">
     <style>
         * {
             margin: 0;
@@ -886,6 +888,19 @@
             announcement.textContent = 'Professional Passport Photo Generator loaded and ready to use';
             document.body.appendChild(announcement);
         });
+    </script>
+
+        <script>
+    // Register service worker for offline and installability
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js')
+        .then(reg => {
+          console.log('Service worker registered!', reg);
+        })
+        .catch(err => {
+          console.error('Service worker registration failed:', err);
+        });
+    }
     </script>
 </body>
 </html>
