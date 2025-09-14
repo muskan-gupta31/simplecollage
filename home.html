@@ -394,24 +394,65 @@
         /* Mobile Optimizations */
         @media (max-width: 768px) {
             body {
-                padding: 0.5rem;
+                padding: 0.75rem;
+                background: var(--bg-light); /* Softer background for mobile */
+            }
+
+            .container {
+                border-radius: var(--border-radius);
+                box-shadow: var(--shadow-medium);
+            }
+
+            .header {
+                padding: 1.5rem;
+            }
+
+            .header h1 {
+                font-size: clamp(1.5rem, 3.5vw, 2rem);
+            }
+
+            .header p {
+                font-size: clamp(0.9rem, 2vw, 1rem);
             }
 
             .section {
-                padding: 1.5rem;
+                padding: 1.25rem;
             }
 
             .upload-area {
                 padding: 2rem 1rem;
-                min-height: 150px;
+                min-height: 180px;
+                border-radius: var(--border-radius-lg);
+                border: 2px dashed #a0aec0; /* Slightly darker for contrast */
+                background: var(--bg-white);
+                transition: var(--transition);
+            }
+
+            .upload-area:hover,
+            .upload-area.dragover {
+                border-color: #4facfe;
+                background: #edf2ff;
+                transform: scale(1.02);
             }
 
             .upload-icon {
-                font-size: 2.5rem;
+                font-size: 2.8rem;
+                margin-bottom: 0.75rem;
             }
 
             .upload-text {
                 font-size: 1.1rem;
+                font-weight: 600;
+            }
+
+            .upload-subtext {
+                font-size: 0.85rem;
+            }
+
+            .preview-image {
+                max-width: 160px;
+                max-height: 160px;
+                border-radius: var(--border-radius);
             }
 
             .options-grid {
@@ -420,33 +461,46 @@
             }
 
             .option-group {
-                padding: 1rem;
+                padding: 1.25rem;
+                border-radius: var(--border-radius);
+                background: var(--bg-light);
+            }
+
+            .number-input {
+                max-width: 180px;
+                font-size: 1.1rem;
+                padding: 0.8rem;
             }
 
             .button-group {
                 flex-direction: column;
                 align-items: center;
+                gap: 0.75rem;
+                margin-top: 1.5rem;
             }
 
             .btn {
                 width: 100%;
-                max-width: 250px;
+                max-width: 280px; /* Constrain button width */
+                padding: 1rem;
+                font-size: 1rem;
+                border-radius: 40px; /* Slightly less rounded for professional look */
+                touch-action: manipulation; /* Improve touch responsiveness */
+            }
+
+            .btn:hover {
+                transform: translateY(-1px);
             }
 
             .grid-container {
-                gap: 2px;
-                padding: 0.5rem;
-            }
-
-            .preview-image {
-                max-width: 150px;
-                max-height: 150px;
+                gap: 4px;
+                padding: 0.75rem;
             }
         }
 
         @media (max-width: 480px) {
             .header {
-                padding: 1.5rem;
+                padding: 1rem;
             }
 
             .section {
@@ -454,11 +508,22 @@
             }
 
             .upload-area {
-                padding: 1.5rem 0.5rem;
+                padding: 1.5rem 0.75rem;
+                min-height: 160px;
+            }
+
+            .upload-text {
+                font-size: 1rem;
             }
 
             .number-input {
-                max-width: 150px;
+                max-width: 140px;
+                font-size: 1rem;
+            }
+
+            .btn {
+                padding: 0.9rem;
+                font-size: 0.95rem;
             }
         }
 
@@ -472,7 +537,8 @@
             body * {
                 visibility: hidden;
             }
-            .passport-grid, .passport-grid * {
+            .passport-grid,
+            .passport-grid * {
                 visibility: visible;
             }
             .passport-grid {
@@ -483,7 +549,8 @@
                 padding: 0;
                 margin: 0;
             }
-            .btn-print, .grid-title {
+            .btn-print,
+            .grid-title {
                 display: none !important;
             }
             .grid-container {
@@ -499,7 +566,7 @@
             .passport-photo {
                 width: var(--print-photo-width, 35mm);
                 height: var(--print-photo-height, 45mm);
-                border: var(--print-border-width, 0.5px) solid var(--print-border-color, #ccc);
+                border: var(--print-border-width, 1px) solid var(--print-border-color, #000000); /* Default black 1px border */
                 object-fit: cover;
                 margin: 0;
                 padding: 0;
@@ -510,7 +577,18 @@
                 transform: none;
             }
             @page {
-                margin: 0mm;
+                margin: 0px;
+                size: A4; /* Default A4 size for all devices */
+            }
+        }
+
+        /* Mobile-Specific Print Adjustments */
+        @media print and (max-width: 768px) {
+            .passport-photo {
+                border: 1px solid #000000; /* Ensure black 1px border for mobile */
+            }
+            @page {
+                margin: 0mm; /* Slightly larger margin for mobile to avoid clipping */
                 size: A4;
             }
         }
@@ -800,18 +878,39 @@
         // Enhanced print functionality
         function printPhotos() {
             // Set CSS custom properties for print
-            document.documentElement.style.setProperty('--print-photo-width', 
-                document.getElementById('photoWidth').value + 'mm');
-            document.documentElement.style.setProperty('--print-photo-height', 
-                document.getElementById('photoHeight').value + 'mm');
-            document.documentElement.style.setProperty('--print-border-width', 
-                document.getElementById('borderWidth').value + 'px');
-            document.documentElement.style.setProperty('--print-border-color', 
-                document.getElementById('borderColor').value);
+            const photoWidth = document.getElementById('photoWidth').value || 35;
+            const photoHeight = document.getElementById('photoHeight').value || 45;
+            const borderWidth = document.getElementById('borderWidth').value || 1;
+            const borderColor = document.getElementById('borderColor').value || '#000000'; // Default to black for mobile
+
+            document.documentElement.style.setProperty('--print-photo-width', `${photoWidth}mm`);
+            document.documentElement.style.setProperty('--print-photo-height', `${photoHeight}mm`);
+            document.documentElement.style.setProperty('--print-border-width', `${borderWidth}px`);
+            document.documentElement.style.setProperty('--print-border-color', borderColor);
+
+            // Ensure A4 size and mobile compatibility
+            const style = document.createElement('style');
+            style.textContent = `
+                @media print {
+                    @page {
+                        size: A4;
+                        margin: 0mm;
+                    }
+                }
+                @media print and (max-width: 768px) {
+                    @page {
+                        size: A4;
+                        margin: 2mm;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
 
             // Brief delay to ensure styles are applied
             setTimeout(() => {
                 window.print();
+                // Clean up the temporary style element after printing
+                document.head.removeChild(style);
             }, 100);
         }
 
@@ -874,7 +973,13 @@
         // Service Worker registration for offline capability (optional enhancement)
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                // Service worker code would go here for offline functionality
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => {
+                        console.log('Service worker registered!', reg);
+                    })
+                    .catch(err => {
+                        console.error('Service worker registration failed:', err);
+                    });
             });
         }
 
@@ -888,19 +993,6 @@
             announcement.textContent = 'Professional Passport Photo Generator loaded and ready to use';
             document.body.appendChild(announcement);
         });
-    </script>
-
-        <script>
-    // Register service worker for offline and installability
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js')
-        .then(reg => {
-          console.log('Service worker registered!', reg);
-        })
-        .catch(err => {
-          console.error('Service worker registration failed:', err);
-        });
-    }
     </script>
 </body>
 </html>
