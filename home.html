@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Professional Passport Photo Generator</title>
+    <title>Passport Photo</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#667eea">
     <style>
@@ -332,7 +332,7 @@
             justify-content: center;
             gap: 4px;
             margin-bottom: 2rem;
-            background: var(--bg-light);
+            background: var(--bg-white);
             padding: 1rem;
             border-radius: var(--border-radius);
         }
@@ -395,7 +395,7 @@
         @media (max-width: 768px) {
             body {
                 padding: 0.75rem;
-                background: var(--bg-light); /* Softer background for mobile */
+                background: var(--bg-light);
             }
 
             .container {
@@ -423,7 +423,7 @@
                 padding: 2rem 1rem;
                 min-height: 180px;
                 border-radius: var(--border-radius-lg);
-                border: 2px dashed #a0aec0; /* Slightly darker for contrast */
+                border: 2px dashed #a0aec0;
                 background: var(--bg-white);
                 transition: var(--transition);
             }
@@ -481,11 +481,11 @@
 
             .btn {
                 width: 100%;
-                max-width: 280px; /* Constrain button width */
+                max-width: 280px;
                 padding: 1rem;
                 font-size: 1rem;
-                border-radius: 40px; /* Slightly less rounded for professional look */
-                touch-action: manipulation; /* Improve touch responsiveness */
+                border-radius: 40px;
+                touch-action: manipulation;
             }
 
             .btn:hover {
@@ -546,6 +546,7 @@
                 left: 0;
                 top: 0;
                 width: 100%;
+                height: 100%;
                 padding: 0;
                 margin: 0;
             }
@@ -554,11 +555,11 @@
                 display: none !important;
             }
             .grid-container {
-                display: grid;
-                grid-template-columns: repeat(auto-fill, var(--print-photo-width, 35mm));
+                display: flex;
+                flex-wrap: wrap;
                 gap: 1mm;
-                justify-content: start;
-                align-content: start;
+                justify-content: flex-start;
+                align-content: flex-start;
                 margin: 0;
                 padding: 0;
                 background: white;
@@ -566,7 +567,7 @@
             .passport-photo {
                 width: var(--print-photo-width, 35mm);
                 height: var(--print-photo-height, 45mm);
-                border: var(--print-border-width, 1px) solid var(--print-border-color, #000000); /* Default black 1px border */
+                border: var(--print-border-width, 1px) solid var(--print-border-color, #000000);
                 object-fit: cover;
                 margin: 0;
                 padding: 0;
@@ -577,19 +578,8 @@
                 transform: none;
             }
             @page {
-                margin: 0px;
-                size: A4; /* Default A4 size for all devices */
-            }
-        }
-
-        /* Mobile-Specific Print Adjustments */
-        @media print and (max-width: 768px) {
-            .passport-photo {
-                border: 1px solid #000000; /* Ensure black 1px border for mobile */
-            }
-            @page {
-                margin: 0mm; /* Slightly larger margin for mobile to avoid clipping */
-                size: A4;
+                size: A4 landscape;
+                margin: 0mm 2mm 2mm 0mm;
             }
         }
 
@@ -834,12 +824,13 @@
                         // Mobile: optimize for smaller screens
                         cols = count <= 2 ? count : Math.min(Math.floor(window.innerWidth / (widthPx + 20)), count);
                     } else {
-                        // Desktop: optimize for A4 print layout
-                        cols = count <= 6 ? count : Math.min(Math.floor(210 / photoWidthMM), count);
+                        // Desktop: optimize for A4 landscape print layout
+                        cols = count <= 6 ? count : Math.min(Math.floor(297 / photoWidthMM), count);
                     }
                     
                     if (cols < 1) cols = 1;
 
+                    gridContainer.style.display = 'grid';
                     gridContainer.style.gridTemplateColumns = `repeat(${cols}, ${widthPx}px)`;
 
                     // Generate photos
@@ -851,7 +842,7 @@
                         img.style.width = widthPx + 'px';
                         img.style.height = heightPx + 'px';
                         img.style.border = borderWidth + 'px solid ' + borderColor;
-                        img.loading = 'lazy'; // Optimize loading
+                        img.loading = 'lazy';
                         gridContainer.appendChild(img);
                     }
 
@@ -877,41 +868,116 @@
 
         // Enhanced print functionality
         function printPhotos() {
-            // Set CSS custom properties for print
-            const photoWidth = document.getElementById('photoWidth').value || 35;
-            const photoHeight = document.getElementById('photoHeight').value || 45;
-            const borderWidth = document.getElementById('borderWidth').value || 1;
-            const borderColor = document.getElementById('borderColor').value || '#000000'; // Default to black for mobile
+            const photoWidthMM = parseInt(document.getElementById('photoWidth').value) || 35;
+            const photoHeightMM = parseInt(document.getElementById('photoHeight').value) || 45;
+            const borderWidth = parseInt(document.getElementById('borderWidth').value) || 1;
+            const borderColor = document.getElementById('borderColor').value || '#000000';
+            const photoCount = parseInt(document.getElementById('photoCount').value) || 8;
 
-            document.documentElement.style.setProperty('--print-photo-width', `${photoWidth}mm`);
-            document.documentElement.style.setProperty('--print-photo-height', `${photoHeight}mm`);
+            // Set CSS custom properties for print
+            document.documentElement.style.setProperty('--print-photo-width', `${photoWidthMM}mm`);
+            document.documentElement.style.setProperty('--print-photo-height', `${photoHeightMM}mm`);
             document.documentElement.style.setProperty('--print-border-width', `${borderWidth}px`);
             document.documentElement.style.setProperty('--print-border-color', borderColor);
 
-            // Ensure A4 size and mobile compatibility
-            const style = document.createElement('style');
-            style.textContent = `
-                @media print {
-                    @page {
-                        size: A4;
-                        margin: 0mm;
-                    }
-                }
-                @media print and (max-width: 768px) {
-                    @page {
-                        size: A4;
-                        margin: 2mm;
-                    }
-                }
-            `;
-            document.head.appendChild(style);
+            // Create a canvas to render the photo grid as a single image
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+            img.src = uploadedImage;
 
-            // Brief delay to ensure styles are applied
-            setTimeout(() => {
-                window.print();
-                // Clean up the temporary style element after printing
-                document.head.removeChild(style);
-            }, 100);
+            img.onload = function() {
+                // Calculate canvas size (A4 landscape at 300 DPI: 3508x2480 px)
+                const dpi = 300;
+                const mmToPx = dpi / 25.4; // Convert mm to pixels at 300 DPI
+                const a4WidthPx = 297 * mmToPx; // A4 landscape width
+                const a4HeightPx = 210 * mmToPx; // A4 landscape height
+                const photoWidthPx = photoWidthMM * mmToPx;
+                const photoHeightPx = photoHeightMM * mmToPx;
+                const borderWidthPx = borderWidth * (dpi / 96); // Scale border width
+                const gapPx = 1 * mmToPx; // 1mm gap
+
+                // Calculate columns and rows to fit photos
+                const cols = Math.floor(a4WidthPx / (photoWidthPx + gapPx));
+                const rows = Math.ceil(photoCount / cols);
+                canvas.width = cols * (photoWidthPx + gapPx) - gapPx;
+                canvas.height = rows * (photoHeightPx + gapPx) - gapPx;
+
+                // Draw white background
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Draw photos with borders
+                for (let i = 0; i < photoCount; i++) {
+                    const col = i % cols;
+                    const row = Math.floor(i / cols);
+                    const x = col * (photoWidthPx + gapPx);
+                    const y = row * (photoHeightPx + gapPx);
+
+                    // Draw border
+                    ctx.fillStyle = borderColor;
+                    ctx.fillRect(x, y, photoWidthPx, photoHeightPx);
+
+                    // Draw image inside border
+                    ctx.drawImage(
+                        img,
+                        x + borderWidthPx,
+                        y + borderWidthPx,
+                        photoWidthPx - 2 * borderWidthPx,
+                        photoHeightPx - 2 * borderWidthPx
+                    );
+                }
+
+                // Create temporary image element for printing
+                const printImg = document.createElement('img');
+                printImg.src = canvas.toDataURL('image/png');
+                printImg.style.position = 'absolute';
+                printImg.style.left = '0';
+                printImg.style.top = '0';
+                printImg.style.width = '297mm';
+                printImg.style.height = 'auto';
+                printImg.id = 'print-image';
+                document.body.appendChild(printImg);
+
+                // Inject print styles
+                const style = document.createElement('style');
+                style.id = 'print-styles';
+                style.textContent = `
+                    @media print {
+                        @page {
+                            size: A4 landscape;
+                            margin: 0mm 2mm 2mm 0mm;
+                        }
+                        body * {
+                            visibility: hidden;
+                        }
+                        #print-image {
+                            visibility: visible;
+                            position: absolute;
+                            left: 0;
+                            top: 0;
+                            width: 297mm;
+                            height: auto;
+                        }
+                        .passport-grid {
+                            display: none !important;
+                        }
+                    }
+                `;
+                document.head.appendChild(style);
+
+                // Trigger print
+                setTimeout(() => {
+                    window.print();
+                    // Clean up
+                    document.getElementById('print-image')?.remove();
+                    document.getElementById('print-styles')?.remove();
+                }, 100);
+            };
+
+            img.onerror = function() {
+                showAlert('Error loading image for printing. Please try again.');
+            };
         }
 
         // Enhanced reset with confirmation
@@ -969,19 +1035,6 @@
                 }
             }, 250);
         });
-
-        // Service Worker registration for offline capability (optional enhancement)
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js')
-                    .then(reg => {
-                        console.log('Service worker registered!', reg);
-                    })
-                    .catch(err => {
-                        console.error('Service worker registration failed:', err);
-                    });
-            });
-        }
 
         // Initialize accessibility features
         document.addEventListener('DOMContentLoaded', () => {
